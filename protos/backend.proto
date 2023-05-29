@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "gxp.proto";
+
+
+option go_package = "gf-svc-poc/backend";
+package backend;
+
+message GetAllRequest {
+
+}
+
+message GetAllResponse {
+  repeated gxp.Balance balances = 1;
+  repeated gxp.Transaction transactions = 2;
+}
+
+message AddGxpRequest {
+  uint32 userId = 1;
+  uint32 amount = 2;
+}
+
+message AddGxpResponse {
+  string correlationId = 1;
+}
+
+message GetUserGxpBalanceRequest {
+  uint32 userId = 1;
+}
+
+message GetUserGxpBalanceResponse {
+  uint32 balance = 1;
+  uint32 reserved = 2;
+  google.protobuf.Timestamp updatedAt = 3;
+  string correlationId = 4;
+}
+
+message BuyItemRequest {
+  uint32 userId = 1;
+  uint32 itemId = 2; // consider changing this to marketplaceItemId
+}
+
+message BuyItemResponse {
+  uint32 userItemId = 1;
+  string correlationId = 2;
+}
+
+message CreateUserRequest {
+  string name = 1;
+}
+
+message CreateUserResponse {
+  uint32 userId = 1;
+  string correlationId = 2;
+}
+
+message CreateItemRequest {
+  string name = 1;
+  uint32 cost = 2;
+}
+
+message CreateItemResponse {
+  uint32 itemId = 1;
+  string correlationId = 2;
+}
+
+message CreateMarketplaceItemRequest {
+  uint32 itemId = 1;
+  uint32 count = 2;
+}
+
+message CreateMarketplaceItemResponse {
+  uint32 marketplaceItemId = 1;
+  string correlationId = 2;
+}
+
+message CreateUserItemRequest {
+  uint32 userId = 1;
+  uint32 itemId = 2;
+  uint32 count = 3;
+}
+
+message CreateUserItemResponse {
+  uint32 userItemId = 1;
+  string correlationId = 2;
+}

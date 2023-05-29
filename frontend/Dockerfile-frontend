@@ -1,0 +1,29 @@
+# run from workspace root
+
+FROM node:lts
+
+RUN apt-get update && \
+apt-get install -y protobuf-compiler &&\
+npm install -g npm@latest
+
+# make all the folders
+WORKDIR /gf-svc-poc/backend/src
+WORKDIR /gf-svc-poc/gxp/src
+WORKDIR /gf-svc-poc/frontend/src
+WORKDIR /gf-svc-poc/protos
+
+WORKDIR /gf-svc-poc
+COPY ./protos /gf-svc-poc/protos
+COPY ./frontend /gf-svc-poc/frontend
+
+WORKDIR /gf-svc-poc/protos
+RUN npm ci
+RUN npm run build
+
+WORKDIR /gf-svc-poc/frontend
+RUN npm ci
+RUN npm run build
+
+EXPOSE 30080
+
+CMD [ "npm", "run", "serve" ]

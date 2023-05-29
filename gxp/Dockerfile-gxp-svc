@@ -1,0 +1,31 @@
+# run from workspace root
+
+FROM node:lts
+
+RUN apt-get update && \
+apt-get install -y protobuf-compiler &&\
+npm install -g npm@latest
+
+ADD https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh /usr/wait-for-it.sh
+RUN chmod +x /usr/wait-for-it.sh
+
+WORKDIR /gf-svc-poc
+COPY ./protos /gf-svc-poc/protos
+COPY ./gxp /gf-svc-poc/gxp
+
+WORKDIR /gf-svc-poc/frontend/src
+WORKDIR /gf-svc-poc/backend/src
+
+WORKDIR /gf-svc-poc/protos
+RUN npm ci
+RUN npm run build
+
+WORKDIR /gf-svc-poc/gxp
+RUN npm ci
+RUN npm run build
+
+EXPOSE 30002
+
+ENTRYPOINT ["/usr/wait-for-it.sh", "gxp-postgres:5432", "--"]
+
+CMD ["node", "dist/index.js"]

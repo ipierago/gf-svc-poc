@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+  backend-postgres:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile-backend-postgres
+    image: gf-svc-poc-backend-postgres
+    container_name: backend-postgres
+    expose:
+      - '5432'
+
+  backend-svc:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile-backend-svc
+    image: gf-svc-poc-backend-svc
+    container_name: backend-svc
+    depends_on:
+      - backend-postgres
+    ports:
+      - '30000:30000'
+
+  gxp-postgres:
+    build:
+      context: .
+      dockerfile: ./gxp/Dockerfile-gxp-postgres
+    image: gf-svc-poc-gxp-postgres
+    container_name: gxp-postgres
+    expose:
+      - '5432'
+
+  gxp-svc:
+    build:
+      context: .
+      dockerfile: ./gxp/Dockerfile-gxp-svc
+    image: gf-svc-poc-gxp-svc
+    container_name: gxp-svc
+    expose:
+      - '30002'
+    depends_on:
+      - gxp-postgres
+
+  frontend:
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile-frontend
+    image: gf-svc-poc-frontend
+    container_name: frontend
+    ports:
+      - '30080:30080'

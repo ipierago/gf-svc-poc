@@ -1,0 +1,98 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "gf-svc-poc/gxp";
+package gxp;
+
+enum TransactionType {
+  ADD = 0;
+  SUBTRACT = 1;
+}
+
+enum TransactionStatus {
+  PENDING = 0;
+  ABORTED = 1;
+  COMMITTED = 2;
+}
+
+
+message Balance {
+  uint32 balance = 1;
+  uint32 reserved = 2;
+  google.protobuf.Timestamp updated_at = 3;
+}
+
+message Transaction {
+  uint32 balance_id = 1;
+  uint32 amount = 2;
+  TransactionType type = 3;
+  TransactionStatus status = 4;
+  string correlation_id = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+message GetAllRequest {
+
+}
+
+message GetAllResponse {
+  repeated Balance balances = 1;
+  repeated Transaction transactions = 2;
+}
+
+
+message TransactionPrepareRequest {
+  uint32 userId = 1;
+  TransactionType type = 2;
+  uint32 amount = 3;  
+  string correlationId = 4;
+  google.protobuf.Timestamp correlationTimestamp = 5;
+}
+
+message TransactionPrepareResponse {
+  string correlationId = 1;
+}
+
+message TransactionCommitRequest{
+  string correlationId = 1;
+}
+
+message TransactionAbortRequest{
+  string correlationId = 1;
+}
+
+message CreateUserBalanceRequest {
+  uint32 userId = 1;
+  string correlationId = 3;
+  google.protobuf.Timestamp correlationTimestamp = 4;
+}
+
+message CreateUserBalanceResponse {
+  string correlationId = 1;
+}
+
+message GetUserBalanceRequest {
+  uint32 userId = 1;
+  string correlationId = 3;
+  google.protobuf.Timestamp correlationTimestamp = 4;
+}
+
+message GetUserBalanceResponse {
+  uint32 balance = 1;
+  uint32 reserved = 2;
+  google.protobuf.Timestamp updatedAt = 3;
+  string correlationId = 4;
+}
+
+service Gxp {
+  rpc TransactionPrepare(TransactionPrepareRequest) returns (TransactionPrepareResponse) {}
+  rpc TransactionAbort(TransactionAbortRequest) returns (google.protobuf.Empty) {}
+  rpc TransactionCommit(TransactionCommitRequest) returns (google.protobuf.Empty) {}
+
+  rpc CreateUserBalance(CreateUserBalanceRequest) returns (CreateUserBalanceResponse) {}
+  rpc GetUserBalance(GetUserBalanceRequest) returns (GetUserBalanceResponse) {}
+
+  rpc GetAll(GetAllRequest) returns (GetAllResponse) {}
+}
