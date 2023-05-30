@@ -85,6 +85,8 @@ There are no volumes defined, but if you do not rm the container, the contents o
 - (pub/sub in backend)
 - use events for commit/abort
 
+- do something with frontend
+
 - gxp
   - convert gxp to golang
   - in-memory cache

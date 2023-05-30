@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eventlog-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eventlog-db
+  template:
+    metadata:
+      labels:
+        app: eventlog-db
+    spec:
+      containers:
+        - name: eventlog-db
+          image: gf-svc-poc-eventlog-db
+          ports:
+            - containerPort: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eventlog-db
+spec:
+  selector:
+    app: eventlog-db
+  ports:
+    - port: 5432
+      targetPort: 5432
+  type: ClusterIP

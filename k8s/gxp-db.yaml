@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gxp-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gxp-db
+  template:
+    metadata:
+      labels:
+        app: gxp-db
+    spec:
+      containers:
+        - name: gxp-db
+          image: gf-svc-poc-gxp-db
+          ports:
+            - containerPort: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gxp-db
+spec:
+  selector:
+    app: gxp-db
+  ports:
+    - port: 5432
+      targetPort: 5432
+  type: ClusterIP

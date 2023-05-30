@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gxp-svc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gxp-svc
+  template:
+    metadata:
+      labels:
+        app: gxp-svc
+    spec:
+      containers:
+        - name: gxp-svc
+          image: gf-svc-poc-gxp-svc
+          ports:
+            - containerPort: 30002
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gxp-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: gxp-svc
+  ports:
+    - protocol: TCP
+      port: 30002
+      targetPort: 30002

@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eventlog-svc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eventlog-svc
+  template:
+    metadata:
+      labels:
+        app: eventlog-svc
+    spec:
+      containers:
+        - name: eventlog-svc
+          image: gf-svc-poc-eventlog-svc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eventlog-svc
+spec:
+  clusterIP: None
+  selector:
+    app: eventlog-svc

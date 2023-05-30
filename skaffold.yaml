@@ -1,0 +1,47 @@
+apiVersion: skaffold/v2beta26
+kind: Config
+metadata:
+  name: gf-svc-poc
+build:
+  artifacts:
+    - image: gf-svc-poc-frontend
+      context: .
+      docker:
+        dockerfile: frontend/Dockerfile-frontend
+
+    - image: gf-svc-poc-backend-svc
+      context: .
+      docker:
+        dockerfile: backend/Dockerfile-backend-svc
+
+    - image: gf-svc-poc-backend-db
+      context: .
+      docker:
+        dockerfile: backend/Dockerfile-backend-db
+
+    - image: gf-svc-poc-gxp-svc
+      context: .
+      docker:
+        dockerfile: gxp/Dockerfile-gxp-svc
+
+    - image: gf-svc-poc-gxp-db
+      context: .
+      docker:
+        dockerfile: gxp/Dockerfile-gxp-db
+
+    - image: gf-svc-poc-eventlog-svc
+      context: .
+      docker:
+        dockerfile: eventlog/Dockerfile-eventlog-svc
+
+    - image: gf-svc-poc-eventlog-db
+      context: .
+      docker:
+        dockerfile: eventlog/Dockerfile-eventlog-db
+
+#  local:
+#    useBuildkit: false
+deploy:
+  kubectl:
+    manifests:
+      - k8s/*
