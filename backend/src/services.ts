@@ -1,29 +1,20 @@
-import { ServiceError, credentials } from '@grpc/grpc-js';
-import { promisify } from 'util';
+import * as gxp from '../../shared/dist/gen/gxp';
+import * as backend from '../../shared/dist/gen/backend';
+import { connectGxpAPI, gxpAPI } from "../../shared/dist/api";
+import { sendBuyItemEvent, subscribeBuyItemEvent } from '../../shared/dist/events'
 
-import * as gxp from './gen/ts/gxp';
-import * as backend from './gen/ts/backend';
-import { Empty } from "./gen/ts/google/protobuf/empty";
-
-import { appDataSource } from "./AppDataSource";
 import { User } from "./entity/User";
 import { Item } from "./entity/Item";
 import { MarketplaceItem } from './entity/MarketplaceItem';
 import { UserItem } from './entity/UserItem';
 
-import { sendBuyItemEvent, subscribeBuyItemEvent } from '../../shared/dist/events'
+import { appDataSource } from "./AppDataSource";
 
-const GXP_ADDR = "gxp-svc:30002";
-let gxpClient: gxp.GxpClient;
 
-const fireAndForgetCallback = (error: ServiceError | null, response: Empty): void => {
-  if (error) console.error(error);
-}
+let gxpAPI: gxpAPI;
 
 export const getAll = async (): Promise<backend.GetAllResponse> => {
-  const promisifiedFunction = promisify(gxpClient.getAll).bind(gxpClient);
-  const gxpRequest: gxp.GetAllRequest = {};
-  const gxpResponse: gxp.GetAllResponse = await promisifiedFunction(gxpRequest) as gxp.GetAllResponse;
+  const gxpResponse = await gxpAPI.getAll({});
   console.log(JSON.stringify(gxpResponse));
   const backendResponse: backend.GetAllResponse = {
     balances: gxpResponse.balances, transactions: gxpResponse.transactions
@@ -31,13 +22,10 @@ export const getAll = async (): Promise<backend.GetAllResponse> => {
   return backendResponse;
 }
 
-export const getUserGxpBalance = async (getUserGxpBalanceRequest: backend.GetUserGxpBalanceRequest, correlationId: string):
-  Promise<backend.GetUserGxpBalanceResponse> => {
+export const getUserGxpBalance = async (getUserGxpBalanceRequest: backend.GetUserGxpBalanceRequest, correlationId: string): Promise<backend.GetUserGxpBalanceResponse> => {
   console.log(`getUserGxpBalance: ${JSON.stringify(getUserGxpBalanceRequest)} [${correlationId}]`);
   const { userId } = getUserGxpBalanceRequest;
-  const gxpRequest: gxp.GetUserBalanceRequest = { userId, correlationId };
-  const promisifiedFunction = promisify(gxpClient.getUserBalance).bind(gxpClient);
-  const gxpResponse: gxp.GetUserBalanceResponse = await promisifiedFunction(gxpRequest) as gxp.GetUserBalanceResponse;
+  const gxpResponse = await gxpAPI.getUserBalance({ userId, correlationId });
   console.log(JSON.stringify(gxpResponse));
   const backendResponse: backend.GetUserGxpBalanceResponse = {
     balance: gxpResponse.balance, reserved: gxpResponse.reserved,
@@ -54,21 +42,19 @@ export const addUserGxp = async (addGxpRequest: backend.AddGxpRequest, correlati
   try {
     const { userId, amount } = addGxpRequest;
     const user = await User.findOneByOrFail({ id: userId });
-
     const transactionPrepareRequest: gxp.TransactionPrepareRequest = {
       userId,
       type: gxp.TransactionType.ADD,
       amount, correlationId, correlationTimestamp
     };
-    const promisifiedFunction = promisify(gxpClient.transactionPrepare).bind(gxpClient);
-    const transactionPrepareResponse = await promisifiedFunction(transactionPrepareRequest);
+    const transactionPrepareResponse = await gxpAPI.transactionPrepare(transactionPrepareRequest);
     console.log(`TransactionPrepareResponse: ${JSON.stringify(transactionPrepareResponse)}`);
-    gxpClient.transactionCommit({ correlationId }, fireAndForgetCallback);
+    gxpAPI.transactionCommit({ correlationId });
     const addGxpResponse: backend.AddGxpResponse = { correlationId };
     console.log(`addGxpResponse: ${JSON.stringify(addGxpResponse)}[${correlationId}]`);
     return addGxpResponse;
   } catch (error) {
-    gxpClient.transactionAbort({ correlationId }, fireAndForgetCallback);
+    gxpAPI.transactionAbort({ correlationId });
     throw error;
   }
 };
@@ -86,40 +72,35 @@ export const buyMarketplaceItem = async (buyItemRequest: backend.BuyItemRequest,
       type: gxp.TransactionType.SUBTRACT,
       amount: item.cost, correlationId, correlationTimestamp
     };
-    const promisifiedFunction = promisify(gxpClient.transactionPrepare).bind(gxpClient);
-    const transactionPrepareResponse = await promisifiedFunction(transactionPrepareRequest);
+    const transactionPrepareResponse = await gxpAPI.transactionPrepare(transactionPrepareRequest);
     console.log(`TransactionPrepareResponse: ${JSON.stringify(transactionPrepareResponse)}`);
     let userItem: UserItem | null = null;
     await appDataSource.transaction(async (entityMgr) => {
-      /*
-      const updateResult = await entityMgr.createQueryBuilder().update(MarketplaceItem).set({ count: () => "count - 1" })
-        .where("itemId = :itemId AND count > 0", { itemId })
-        .execute();
-        */
       console.log(`{userId: ${userId}, itemId: ${itemId}}`);
       console.log(`itemId = ${itemId} AND count > 0`);
       const updateResult = await entityMgr.createQueryBuilder().update(MarketplaceItem).set({ count: () => "count - 1" })
         .where(`itemId = ${itemId} AND count > 0`)
         .execute();
       if (updateResult.affected == 0) {
-        throw new Error("Out of stock");
+        throw new Error("Failed to decrement count, probably out of stock");
       }
       const updateResult2 = await entityMgr.createQueryBuilder().update(UserItem).set({ count: () => "count + 1" })
         .where("userId = :userId AND itemId = :itemId", { userId, itemId })
         .execute();
       if (updateResult2.affected == 0) {
+        // failed to update an existing one, so create one
         await entityMgr.create(UserItem, { userId, itemId }).save();
       }
       userItem = await entityMgr.findOneByOrFail(UserItem, { userId, itemId });
     });
     console.log(`UserItem: ${JSON.stringify(userItem)}`);
-    gxpClient.transactionCommit({ correlationId }, fireAndForgetCallback);
+    gxpAPI.transactionCommit({ correlationId });
     sendBuyItemEvent(userId, itemId, userItem!.id, correlationId);
     const buyItemResponse: backend.BuyItemResponse = { userItemId: userItem!.id, correlationId };
     console.log(`buyItemResponse: ${JSON.stringify(buyItemResponse)}[${correlationId}]`);
     return buyItemResponse;
   } catch (error) {
-    gxpClient.transactionAbort({ correlationId }, fireAndForgetCallback);
+    gxpAPI.transactionAbort({ correlationId });
     console.error((error as Error).message);
     throw error;
   }
@@ -130,8 +111,7 @@ export const createUser = async (createUserRequest: backend.CreateUserRequest,
   const user = await User.create({ name: createUserRequest.name }).save();
   console.log(`user: ${JSON.stringify(user)}`);
   const createUserBalanceRequest: gxp.CreateUserBalanceRequest = { userId: user.id, correlationId, correlationTimestamp };
-  const promisifiedFunction = promisify(gxpClient.createUserBalance).bind(gxpClient);
-  const result = await promisifiedFunction(createUserBalanceRequest);
+  const result = await gxpAPI.createUserBalance(createUserBalanceRequest);
   console.log(`result: ${JSON.stringify(result)}`);
   const createUserResponse: backend.CreateUserResponse = { userId: user.id, correlationId };
   console.log(`createUserResponse: ${JSON.stringify(createUserResponse)}[${correlationId}]`);
@@ -169,18 +149,11 @@ export const createUserItem = async (createUserItemRequest: backend.CreateUserIt
 };
 
 export const initializeServices = async (): Promise<void> => {
+  console.log('initializeServices');
 
-  gxpClient = new gxp.GxpClient(GXP_ADDR, credentials.createInsecure());
+  gxpAPI = await connectGxpAPI();
 
-  console.log('calling gxpClient.waitForReady')
-  gxpClient.waitForReady(new Date(Date.now() + 5000), (error: any) => {
-    if (error) {
-      console.error('Failed to connect to the gxp server:', error);
-    } else {
-      console.log('Connection to gxp established successfully.');
-    }
-  });
-
+  console.log('calling subscribeBuyItemEvent');
   subscribeBuyItemEvent((buyItemEvent) => {
     console.log(`consumed BuyItemEvent: ${JSON.stringify(buyItemEvent)}`);
   });

@@ -2,7 +2,7 @@ import * as amqp from 'amqplib';
 
 let channel: amqp.Channel;
 
-import { BuyItemEvent } from './gen/ts/backend';
+import { BuyItemEvent } from './gen/backend';
 
 const buy_item_event = 'BuyItemEvent';
 const topic_exchange = 'topic_exchange';

@@ -1,4 +1,4 @@
-import { BuyItemRequest, BuyItemResponse, CreateUserRequest, CreateUserResponse } from './gen/ts/backend'
+import { BuyItemRequest, BuyItemResponse, CreateUserRequest, CreateUserResponse } from '../../shared/dist/gen/backend'
 
 const BACKEND_URL = "http://localhost:30000";
 

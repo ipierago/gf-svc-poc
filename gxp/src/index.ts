@@ -1,6 +1,6 @@
 import * as grpc from '@grpc/grpc-js';
 
-import * as gxp from './gen/ts/gxp';
+import * as gxp from '../../shared/dist/gen/gxp';
 
 import { appDataSource } from "./AppDataSource"
 import { startHeartbeat } from "./heartbeat"
@@ -31,7 +31,9 @@ async function main() {
     server.addService(gxp.GxpService, new GxpServerImpl());
     const addr = `${MY_DOMAIN}:${MY_PORT}`;
     console.log('calling grpc.Server.bindAsyn');
-    server.bindAsync(addr, grpc.ServerCredentials.createInsecure(), (err, port) => {
+    const srvCred = grpc.ServerCredentials.createInsecure();
+    console.log(`srvCred: ${JSON.stringify(srvCred)}`);
+    server.bindAsync(addr, srvCred, (err, port) => {
       if (err) {
         console.error('Failed to start server:', err);
         return;

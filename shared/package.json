@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc"
+    "build": "./build-protos.sh && tsc"
   },
   "keywords": [],
   "author": "",

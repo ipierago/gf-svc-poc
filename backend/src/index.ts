@@ -8,7 +8,7 @@ import {
   CreateUserItemRequest, AddGxpRequest,
   GetUserGxpBalanceRequest, GetUserGxpBalanceResponse,
   GetAllRequest, GetAllResponse
-} from './gen/ts/backend';
+} from '../../shared/dist/gen/backend';
 import { appDataSource } from "./AppDataSource";
 import {
   buyMarketplaceItem, createUser, createItem,

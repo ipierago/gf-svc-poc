@@ -6,18 +6,11 @@ RUN apt-get update && \
 apt-get install -y protobuf-compiler &&\
 npm install -g npm@latest
 
-# make all the folders
-WORKDIR /gf-svc-poc/backend/src
-WORKDIR /gf-svc-poc/gxp/src
-WORKDIR /gf-svc-poc/frontend/src
-WORKDIR /gf-svc-poc/protos
-WORKDIR /gf-svc-poc/shared/src
-
 WORKDIR /gf-svc-poc
-COPY ./protos /gf-svc-poc/protos
+COPY ./shared /gf-svc-poc/shared
 COPY ./frontend /gf-svc-poc/frontend
 
-WORKDIR /gf-svc-poc/protos
+WORKDIR /gf-svc-poc/shared
 RUN npm ci
 RUN npm run build
 

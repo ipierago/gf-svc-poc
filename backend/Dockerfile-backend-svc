@@ -10,16 +10,8 @@ ADD https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.s
 RUN chmod +x /usr/wait-for-it.sh
 
 WORKDIR /gf-svc-poc
-COPY ./protos /gf-svc-poc/protos
 COPY ./shared /gf-svc-poc/shared
 COPY ./backend /gf-svc-poc/backend
-
-WORKDIR /gf-svc-poc/frontend/src
-WORKDIR /gf-svc-poc/gxp/src
-
-WORKDIR /gf-svc-poc/protos
-RUN npm ci
-RUN npm run build
 
 WORKDIR /gf-svc-poc/shared
 RUN npm ci
