@@ -11,6 +11,7 @@ RUN chmod +x /usr/wait-for-it.sh
 
 WORKDIR /gf-svc-poc
 COPY ./protos /gf-svc-poc/protos
+COPY ./shared /gf-svc-poc/shared
 COPY ./backend /gf-svc-poc/backend
 
 WORKDIR /gf-svc-poc/frontend/src
@@ -20,12 +21,16 @@ WORKDIR /gf-svc-poc/protos
 RUN npm ci
 RUN npm run build
 
+WORKDIR /gf-svc-poc/shared
+RUN npm ci
+RUN npm run build
+
 WORKDIR /gf-svc-poc/backend
 RUN npm ci
 RUN npm run build
 
 EXPOSE 30000
 
-ENTRYPOINT ["/usr/wait-for-it.sh", "backend-postgres:5432", "--", "/usr/wait-for-it.sh", "gxp-svc:30002", "--"]
+ENTRYPOINT ["/usr/wait-for-it.sh", "backend-postgres:5432", "--", "/usr/wait-for-it.sh", "rabbitmq:5672", "--", "/usr/wait-for-it.sh", "gxp-svc:30002", "--"]
 
 CMD ["node", "dist/index.js"]

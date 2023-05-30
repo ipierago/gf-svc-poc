@@ -49,3 +49,9 @@ services:
     container_name: frontend
     ports:
       - '30080:30080'
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    expose:
+      - '15672'
+      - '5672'

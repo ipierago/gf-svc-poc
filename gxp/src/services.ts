@@ -9,7 +9,6 @@ import {
   Transaction, Balance
 } from './gen/ts/gxp';
 
-
 export const transactionPrepare = async (userId: number, type: TransactionType, amount: number, correlationId: string, correlationTimestamp: Date) => {
   console.log(`transactionPrepare begin [${correlationId}]`);
   // TODO: Use optimistic locking retry?

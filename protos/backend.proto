@@ -46,6 +46,13 @@ message BuyItemResponse {
   string correlationId = 2;
 }
 
+message BuyItemEvent {
+  uint32 userId = 1;
+  uint32 itemId = 2;
+  uint32 userItemId = 3;
+  string correlationId = 4;
+}
+
 message CreateUserRequest {
   string name = 1;
 }

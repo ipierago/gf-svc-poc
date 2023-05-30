@@ -13,12 +13,16 @@ import { appDataSource } from "./AppDataSource";
 import {
   buyMarketplaceItem, createUser, createItem,
   createMarketplaceItem, createUserItem, addUserGxp,
-  getUserGxpBalance, getAll
+  getUserGxpBalance, getAll, initializeServices
 } from './services';
 import { User } from "./entity/User";
 import { Item } from "./entity/Item";
 import { MarketplaceItem } from './entity/MarketplaceItem';
 import { UserItem } from './entity/UserItem';
+
+//import { initializeEvents } from '../../shared/src/events';
+//import * as shared from '../../shared/dist/index';
+import { initializeEvents } from '../../shared/dist/events';
 
 
 const MY_PORT = 30000;
@@ -200,9 +204,12 @@ app.listen(MY_PORT, () => {
 
 async function main() {
   try {
+    console.log('Initializing events');
+    await initializeEvents();
     console.log("Initializing database");
     await appDataSource.initialize();
-    console.log("Database initialized");
+    console.log("Initializing services");
+    await initializeServices();
   } catch (error) {
     console.error(error);
     throw error;

@@ -8,3 +8,4 @@ protoc --go_out=./gen/go *.proto
 cp -Rf ./gen ../backend/src
 cp -Rf ./gen ../frontend/src
 cp -Rf ./gen ../gxp/src
+cp -Rf ./gen ../shared/src

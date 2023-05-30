@@ -1,0 +1,25 @@
+{
+  "name": "shared",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@grpc/grpc-js": "^1.8.14",
+    "amqplib": "^0.10.3",
+    "retry": "^0.13.1"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.10.1",
+    "@types/node": "^20.2.5",
+    "@types/retry": "^0.12.2",
+    "ts-node": "^10.9.1",
+    "ts-proto": "^1.148.1",
+    "typescript": "^5.0.4"
+  }
+}

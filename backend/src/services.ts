@@ -11,8 +11,10 @@ import { Item } from "./entity/Item";
 import { MarketplaceItem } from './entity/MarketplaceItem';
 import { UserItem } from './entity/UserItem';
 
+import { sendBuyItemEvent, subscribeBuyItemEvent } from '../../shared/dist/events'
+
 const GXP_ADDR = "gxp-svc:30002";
-const gxpClient = new gxp.GxpClient(GXP_ADDR, credentials.createInsecure());
+let gxpClient: gxp.GxpClient;
 
 const fireAndForgetCallback = (error: ServiceError | null, response: Empty): void => {
   if (error) console.error(error);
@@ -112,6 +114,7 @@ export const buyMarketplaceItem = async (buyItemRequest: backend.BuyItemRequest,
     });
     console.log(`UserItem: ${JSON.stringify(userItem)}`);
     gxpClient.transactionCommit({ correlationId }, fireAndForgetCallback);
+    sendBuyItemEvent(userId, itemId, userItem!.id, correlationId);
     const buyItemResponse: backend.BuyItemResponse = { userItemId: userItem!.id, correlationId };
     console.log(`buyItemResponse: ${JSON.stringify(buyItemResponse)}[${correlationId}]`);
     return buyItemResponse;
@@ -165,13 +168,21 @@ export const createUserItem = async (createUserItemRequest: backend.CreateUserIt
   return createUserItemResponse;
 };
 
+export const initializeServices = async (): Promise<void> => {
 
+  gxpClient = new gxp.GxpClient(GXP_ADDR, credentials.createInsecure());
 
-console.log('calling gxpClient.waitForReady')
-gxpClient.waitForReady(new Date(Date.now() + 5000), (error: any) => {
-  if (error) {
-    console.error('Failed to connect to the gxp server:', error);
-  } else {
-    console.log('Connection to gxp established successfully.');
-  }
-});
+  console.log('calling gxpClient.waitForReady')
+  gxpClient.waitForReady(new Date(Date.now() + 5000), (error: any) => {
+    if (error) {
+      console.error('Failed to connect to the gxp server:', error);
+    } else {
+      console.log('Connection to gxp established successfully.');
+    }
+  });
+
+  subscribeBuyItemEvent((buyItemEvent) => {
+    console.log(`consumed BuyItemEvent: ${JSON.stringify(buyItemEvent)}`);
+  });
+
+}

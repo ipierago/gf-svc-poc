@@ -13,12 +13,14 @@
   "license": "ISC",
   "dependencies": {
     "@grpc/grpc-js": "^1.8.14",
+    "amqplib": "^0.10.3",
     "pg": "^8.10.0",
     "reflect-metadata": "^0.1.13",
     "retry": "^0.13.1",
     "typeorm": "^0.3.16"
   },
   "devDependencies": {
+    "@types/amqplib": "^0.10.1",
     "@types/node": "^16.11.7",
     "@types/retry": "^0.12.2",
     "nodemon": "^2.0.15",

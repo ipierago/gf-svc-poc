@@ -8,11 +8,21 @@ import { GxpServerImpl } from "./GxpServerImpl";
 import { GxpBalance } from "./entity/GxpBalance";
 import { GxpTransaction } from './entity/GxpTransaction';
 
+import { subscribeBuyItemEvent, initializeEvents } from '../../shared/dist/events'
+
+
 const MY_DOMAIN = "0.0.0.0";
 const MY_PORT = 30002;
 
 async function main() {
   try {
+    console.log("Initializing events");
+    await initializeEvents();
+
+    subscribeBuyItemEvent((buyItemEvent) => {
+      console.log(`consumed BuyItemEvent: ${JSON.stringify(buyItemEvent)}`);
+    });
+
     console.log("Initializing database");
     await appDataSource.initialize();
     console.log("Database initialized")
