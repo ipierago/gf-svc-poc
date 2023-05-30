@@ -5,7 +5,7 @@ import { GxpTransaction } from "./entity/GxpTransaction"
 
 export const appDataSource = new DataSource({
     type: "postgres",
-    host: "gxp-postgres",
+    host: "gxp-db",
     port: 5432,
     username: "test",
     password: "test",

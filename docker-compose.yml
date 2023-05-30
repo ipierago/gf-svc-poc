@@ -1,12 +1,12 @@
 version: '3'
 
 services:
-  backend-postgres:
+  backend-db:
     build:
       context: .
-      dockerfile: ./backend/Dockerfile-backend-postgres
-    image: gf-svc-poc-backend-postgres
-    container_name: backend-postgres
+      dockerfile: ./backend/Dockerfile-backend-db
+    image: gf-svc-poc-backend-db
+    container_name: backend-db
     expose:
       - '5432'
 
@@ -17,16 +17,16 @@ services:
     image: gf-svc-poc-backend-svc
     container_name: backend-svc
     depends_on:
-      - backend-postgres
+      - backend-db
     ports:
       - '30000:30000'
 
-  gxp-postgres:
+  gxp-db:
     build:
       context: .
-      dockerfile: ./gxp/Dockerfile-gxp-postgres
-    image: gf-svc-poc-gxp-postgres
-    container_name: gxp-postgres
+      dockerfile: ./gxp/Dockerfile-gxp-db
+    image: gf-svc-poc-gxp-db
+    container_name: gxp-db
     expose:
       - '5432'
 
@@ -39,7 +39,25 @@ services:
     expose:
       - '30002'
     depends_on:
-      - gxp-postgres
+      - gxp-db
+
+  eventlog-db:
+    build:
+      context: .
+      dockerfile: ./eventlog/Dockerfile-eventlog-db
+    image: gf-svc-poc-eventlog-db
+    container_name: eventlog-db
+    expose:
+      - '5432'
+
+  eventlog-svc:
+    build:
+      context: .
+      dockerfile: ./eventlog/Dockerfile-eventlog-svc
+    image: gf-svc-poc-eventlog-svc
+    container_name: eventlog-svc
+    depends_on:
+      - eventlog-db
 
   frontend:
     build:
@@ -52,6 +70,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:3-management
+    container_name: rabbitmq
     expose:
       - '15672'
       - '5672'

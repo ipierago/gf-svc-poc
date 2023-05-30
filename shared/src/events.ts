@@ -21,19 +21,8 @@ export const sendBuyItemEvent = (userId: number, itemId: number, userItemId: num
 
 export const subscribeBuyItemEvent = (callback: (buyItemEvent: BuyItemEvent) => void) => {
   console.log('subscribeBuyItemEvent');
-  /*
-  channel.consume(queueBuyItemEvent, function (msg) {
-    if (msg !== null) {
-      const buffer = msg.content;
-      const user = BuyItemEvent.decode(buffer);
-      callback(user);
-      channel.ack(msg);
-    }
-  });
-  */
   channel.consume(queueResult.queue, (msg) => {
     if (msg !== null) {
-      console.log(`channel.consume [x] ${msg.fields.routingKey}: '${msg.content.toString()}'`);
       if (msg.fields.routingKey === buy_item_event) {
         const buyItemEvent = BuyItemEvent.decode(msg.content);
         callback(buyItemEvent)

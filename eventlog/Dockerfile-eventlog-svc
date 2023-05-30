@@ -11,18 +11,16 @@ RUN chmod +x /usr/wait-for-it.sh
 
 WORKDIR /gf-svc-poc
 COPY ./shared /gf-svc-poc/shared
-COPY ./gxp /gf-svc-poc/gxp
+COPY ./eventlog /gf-svc-poc/eventlog
 
 WORKDIR /gf-svc-poc/shared
 RUN npm ci
 RUN npm run build
 
-WORKDIR /gf-svc-poc/gxp
+WORKDIR /gf-svc-poc/eventlog
 RUN npm ci
 RUN npm run build
 
-EXPOSE 30002
-
-ENTRYPOINT ["/usr/wait-for-it.sh", "gxp-db:5432", "--", "/usr/wait-for-it.sh", "rabbitmq:5672", "--"]
+ENTRYPOINT ["/usr/wait-for-it.sh", "eventlog-db:5432", "--", "/usr/wait-for-it.sh", "rabbitmq:5672", "--"]
 
 CMD ["node", "dist/index.js"]

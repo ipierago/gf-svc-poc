@@ -1,18 +1,57 @@
-# gf-svc-poc
+# GuildFi Microservices Proof of Concept (gf-svc-poc)
 
-GuildFi Microservices Proof of Concept
+This is the companion repo for the document Microservices and Concurrency TDD. It demonstrates many of the ideas presented there.
 
-## Setup
+It demonstrates:
 
-## Build
+- gRPC
+- Two-Phase Commit (2PC)
+- Optimistic locking
+- Pub/Sub
 
-Build protos and shared first. This copies generated files into the other projects.
+## SETUP
+
+### Docker Desktop and Skaffold (PREFERRED)
+
+Turn on Kubernetes in the Docker Desktop configuration
+
+Switch k8s context to use Docker Desktop (use "docker-for-desktop" for MacOS):
 
 ```bash
-cd protos
-npm run build
+kubectl config use-context docker-desktop
+```
+
+## Build and deploy
+
+You can either build and deploy with skaffold/k8s or docker compose.
+
+### Skaffold/K8s
+
+```bash
+skaffold dev
+```
+
+### Docker compose
+
+```bash
+docker compose up --build
+```
+
+### Manual build
+
+If you are building manually, you'll need to build the shared libary first.
+
+```bash
 cd ../shared
 npm run build
+```
+
+## Troubleshooting
+
+Trace debug level for skaffold:
+
+```bash
+skaffold dev -v trace
 ```
 
 ## Test Sequence
@@ -39,28 +78,16 @@ There are no volumes defined, but if you do not rm the container, the contents o
 - aborting timed out pending commits
 - remove updatedAt and optimistic locking
 
-- do something with BuyItemEvent
-
-  - in backend
-  - in another service (feed?)
-
 - k8s
-
 - load balance api route
+
 - long running business logic
+- (pub/sub in backend)
+- use events for commit/abort
+
 - gxp
   - convert gxp to golang
   - in-memory cache
     - initialize with pending operations and recently updated transactions
     - heartbeat saves
   - backed by db
-- inbox
-  - subscribe message in backend and send receipt to inbox
-  - inbox entity
-  - get inbox rest api and frontend
-- activity feed
-  - microservice
-  - subscribe buy item message and record activity
-  - storage - document database?
-  - get activity feed rest api and frontend
-- use events for commit/abort
