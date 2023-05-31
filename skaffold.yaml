@@ -4,11 +4,6 @@ metadata:
   name: gf-svc-poc
 build:
   artifacts:
-    - image: gf-svc-poc-frontend
-      context: .
-      docker:
-        dockerfile: frontend/Dockerfile-frontend
-
     - image: gf-svc-poc-backend-svc
       context: .
       docker:
@@ -44,4 +39,14 @@ build:
 deploy:
   kubectl:
     manifests:
-      - k8s/*
+      #      - k8s/ingress-nginx-controller-v1.8.0.yaml
+      - k8s/backend-db.yaml
+      - k8s/backend-svc-1.yaml
+      - k8s/backend-svc-2.yaml
+      - k8s/eventlog-db.yaml
+      - k8s/eventlog-svc.yaml
+      - k8s/gxp-db.yaml
+      - k8s/gxp-svc.yaml
+      - k8s/ingress.yaml
+      - k8s/nodeport.yaml
+      - k8s/rabbitmq.yaml

@@ -1,0 +1,38 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gf-svc-poc-ingress
+  annotations:
+    kubernetes.io/ingress.class: 'nginx'
+spec:
+  rules:
+    - http:
+        paths:
+          - pathType: Prefix
+            path: '/gxp'
+            backend:
+              service:
+                name: backend-svc-1
+                port:
+                  number: 80
+          - pathType: Prefix
+            path: '/marketplace'
+            backend:
+              service:
+                name: backend-svc-1
+                port:
+                  number: 80
+          - pathType: Prefix
+            path: '/item'
+            backend:
+              service:
+                name: backend-svc-2
+                port:
+                  number: 80
+          - pathType: Prefix
+            path: '/user'
+            backend:
+              service:
+                name: backend-svc-2
+                port:
+                  number: 80

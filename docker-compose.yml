@@ -19,7 +19,9 @@ services:
     depends_on:
       - backend-db
     ports:
-      - '30000:30000'
+      - '30080:30080'
+    environment:
+      - DEPLOYMENT_NAME=backend-svc
 
   gxp-db:
     build:
@@ -58,15 +60,6 @@ services:
     container_name: eventlog-svc
     depends_on:
       - eventlog-db
-
-  frontend:
-    build:
-      context: .
-      dockerfile: ./frontend/Dockerfile-frontend
-    image: gf-svc-poc-frontend
-    container_name: frontend
-    ports:
-      - '30080:30080'
 
   rabbitmq:
     image: rabbitmq:3-management

@@ -8,6 +8,8 @@ It demonstrates:
 - Two-Phase Commit (2PC)
 - Optimistic locking
 - Pub/Sub
+- k8s
+- ingress-nginx
 
 ## SETUP
 
@@ -29,6 +31,26 @@ You can either build and deploy with skaffold/k8s or docker compose.
 
 ```bash
 skaffold dev
+```
+
+There is a known issue with skaffold that the nginx stuff doesn't always boot up correctly, so I've disable it for now. You must deploy nginx ingress controller manually before running skaffold dev.
+
+Install nginx ingress controller (https://kubernetes.github.io/ingress-nginx/deploy/)
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.0/deploy/static/provider/cloud/deploy.yaml
+```
+
+Check that it is running:
+
+```bash
+kubectl get pods --namespace=ingress-nginx
+```
+
+To shutdown:
+
+```bash
+kubectl delete -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.0/deploy/static/provider/cloud/deploy.yaml
 ```
 
 ### Docker compose
@@ -60,15 +82,21 @@ The following is a good test sequence:
 
 ```bash
 cd cli
-npm run dev -- ls
-npm run dev -- get-all
+npm run dev -- info-ls
 npm run dev -- create-user my-name
 npm run dev -- create-item my-item 10
 npm run dev -- create-marketplace-item 1 12
 npm run dev -- user-gxp-add 1 100
 npm run dev -- buy-marketplace-item 1 1
 npm run dev -- ls
-npm run dev -- get-all
+```
+
+```bash
+cd cli
+npm run dev -- marketplace-svc-info
+npm run dev -- user-svc-info
+npm run dev -- item-svc-info
+npm run dev -- gxp-svc-info
 ```
 
 There are no volumes defined, but if you do not rm the container, the contents of the database persist between runs.
@@ -78,14 +106,9 @@ There are no volumes defined, but if you do not rm the container, the contents o
 - aborting timed out pending commits
 - remove updatedAt and optimistic locking
 
-- k8s
-- load balance api route
-
 - long running business logic
 - (pub/sub in backend)
 - use events for commit/abort
-
-- do something with frontend
 
 - gxp
   - convert gxp to golang

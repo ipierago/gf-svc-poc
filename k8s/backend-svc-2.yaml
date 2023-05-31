@@ -1,33 +1,34 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend-svc
+  name: backend-svc-2
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: backend-svc
+      app: backend-svc-2
   template:
     metadata:
       labels:
-        app: backend-svc
+        app: backend-svc-2
     spec:
       containers:
-        - name: backend-svc
+        - name: backend-svc-2
           image: gf-svc-poc-backend-svc
           ports:
-            - containerPort: 30000
+            - containerPort: 30080
+          env:
+            - name: DEPLOYMENT_NAME
+              value: 'backend-svc-2'
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend-svc
+  name: backend-svc-2
 spec:
-  type: NodePort
   selector:
-    app: backend-svc
+    app: backend-svc-2
   ports:
     - protocol: TCP
-      port: 30000
-      targetPort: 30000
-      nodePort: 30000
+      port: 80
+      targetPort: 30080

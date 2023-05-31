@@ -3,7 +3,7 @@
 import { Command } from 'commander';
 import axios from 'axios';
 
-const BACKEND_URL = 'http://localhost:30000';
+const BACKEND_URL = 'http://localhost:30080';
 
 const program = new Command();
 
@@ -30,11 +30,64 @@ program
       const { userItems } = userItemRes.data;
       console.log(`userItems: ${JSON.stringify(userItems)}`);
 
+      const res = await axios.get(`${BACKEND_URL}/gxp/get-all`);
+      console.log(res.data);
+
     } catch (error) {
       console.error(error);
 
     }
   });
+
+program
+  .command('gxp-svc-info')
+  .description('get gxp service info')
+  .action(async () => {
+    try {
+      const res = await axios.get(`${BACKEND_URL}/gxp/svc-info`);
+      console.log(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  });
+
+program
+  .command('user-svc-info')
+  .description('get user service info')
+  .action(async () => {
+    try {
+      const res = await axios.get(`${BACKEND_URL}/user/svc-info`);
+      console.log(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  });
+
+program
+  .command('item-svc-info')
+  .description('get item service info')
+  .action(async () => {
+    try {
+      const res = await axios.get(`${BACKEND_URL}/item/svc-info`);
+      console.log(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  });
+
+
+program
+  .command('marketplace-svc-info')
+  .description('get marketplace service info')
+  .action(async () => {
+    try {
+      const res = await axios.get(`${BACKEND_URL}/marketplace/svc-info`);
+      console.log(res.data);
+    } catch (error) {
+      console.error(error);
+    }
+  });
+
 
 program
   .command('create-user <name>')
@@ -128,18 +181,6 @@ program
         userId,
         itemId,
       });
-      console.log(res.data);
-    } catch (error) {
-      console.error(error);
-    }
-  });
-
-program
-  .command('get-all')
-  .description('get all')
-  .action(async () => {
-    try {
-      const res = await axios.get(`${BACKEND_URL}/get-all`);
       console.log(res.data);
     } catch (error) {
       console.error(error);

@@ -25,12 +25,28 @@ import { UserItem } from './entity/UserItem';
 import { initializeEvents } from '../../shared/dist/events';
 
 
-const MY_PORT = 30000;
+const MY_PORT = 30080;
+
+const deploymentName = process.env.DEPLOYMENT_NAME || 'not set';
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
+
+app.get('/item/svc-info', async (req: Request, res: Response) => {
+  res.send(`/item/svc-info endpoint serviced by ${deploymentName}`);
+})
+app.get('/user/svc-info', async (req: Request, res: Response) => {
+  res.send(`/user/svc-info endpoint serviced by ${deploymentName}`);
+})
+app.get('/marketplace/svc-info', async (req: Request, res: Response) => {
+  res.send(`/marketplace/svc-info endpoint serviced by ${deploymentName}`);
+})
+app.get('/gxp/svc-info', async (req: Request, res: Response) => {
+  res.send(`/gxp/svc-info endpoint serviced by ${deploymentName}`);
+})
+
 
 app.get('/item', async (req: Request, res: Response) => {
   const correlationTimestamp = new Date();
@@ -186,7 +202,7 @@ app.post('/user/create', async (req: Request, res: Response) => {
   }
 });
 
-app.get('/get-all', async (req: Request, res: Response) => {
+app.get('/gxp/get-all', async (req: Request, res: Response) => {
   const correlationId = uuidv4();
   try {
     const getAllResponse = await getAll();
