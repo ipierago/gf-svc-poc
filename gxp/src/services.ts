@@ -15,15 +15,6 @@ export const transactionPrepare = async (userId: number, type: TransactionType, 
   await appDataSource.transaction(async (entityMgr) => {
     const gxpBalance = await entityMgr.findOneByOrFail(GxpBalance, { user_id: userId });
     if (type === TransactionType.SUBTRACT) {
-      /*
-      if (gxpBalance.balance < amount + gxpBalance.reserved) {
-        throw new Error("Not enough unreserved balance");
-      }
-      const newReservedValue = gxpBalance.reserved + amount;      
-      const updateGxpBalanceResult = await entityMgr.update(GxpBalance,
-        { id: gxpBalance.id, updatedAt: gxpBalance.updatedAt }, { reserved: newReservedValue });
-        */
-
       const updateGxpBalanceResult = await entityMgr.createQueryBuilder().update(GxpBalance)
         .set({ reserved: () => `reserved + ${amount}` })
         .where('user_id = :user_id AND balance >= reserved + :amount', { user_id: userId, amount })
@@ -58,11 +49,6 @@ export const transactionCommit = async (correlationId: string) => {
     if (gxpTransaction.status !== GxpTransactionStatus.PENDING) {
       throw new Error("gxpTransaction.status !== GxpTransactionStatus.PENDING")
     }
-    /*    
-        const updateGxpTransationResult = await entityMgr.update(GxpTransaction, 
-          { id: gxpTransaction.id, updatedAt: gxpTransaction.updatedAt }, 
-          { status: GxpTransactionStatus.COMMITTED });
-    */
     const updateGxpTransationResult = await entityMgr.createQueryBuilder().update(GxpTransaction)
       .set({ status: GxpTransactionStatus.COMMITTED })
       .where('id = :id AND status = :status', { id: gxpTransaction.id, status: GxpTransactionStatus.PENDING })
@@ -117,10 +103,6 @@ export const transactionAbort = async (correlationId: string) => {
         throw new Error("Failed to update reserved amount");
       }
     }
-    /*
-    const updateGxpTransationResult = await entityMgr.update(GxpTransaction,
-      { id: gxpTransaction.id, updateAt: gxpTransaction.updatedAt }, { status: GxpTransactionStatus.ABORTED });
-    */
     const updateGxpTransationResult = await entityMgr.createQueryBuilder().update(GxpTransaction)
       .set({ status: GxpTransactionStatus.ABORTED })
       .where('id = :id AND status = :status', { id: gxpTransaction.id, status: GxpTransactionStatus.PENDING })

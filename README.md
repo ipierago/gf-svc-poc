@@ -1,15 +1,25 @@
 # GuildFi Microservices Proof of Concept (gf-svc-poc)
 
-This is the companion repo for the document Microservices and Concurrency TDD. It demonstrates many of the ideas presented there.
+This is the companion repo for the document Microservices Architecture TDD. It demonstrates many of the ideas presented there.
 
 It demonstrates:
 
-- gRPC
-- Two-Phase Commit (2PC)
-- Optimistic locking
-- Pub/Sub
-- k8s
-- ingress-nginx
+- core monolithic backend supported by microservices
+- Optimistic locking for concurrency conflicts within a service
+- Two-Phase Commit (2PC) for concurrency conflicts between services
+- k8s and docker deployment
+- ingress-nginx to load balance routes
+- gRPC for RPC calls
+- pub/sub with RabbitMQ
+- Protobuffers and abstraction layer
+
+Components:
+- backend: core systems
+- gxp: GXP transaction microservice
+- eventlog: ancillary microservice
+- cli: command line interface to backend
+- k8s: kubernetes configuration
+- shared: protobuffers and abstraction layer
 
 ## SETUP
 
@@ -104,15 +114,9 @@ There are no volumes defined, but if you do not rm the container, the contents o
 ## TODO
 
 - aborting timed out pending commits
-- remove updatedAt and optimistic locking
-
-- long running business logic
-- (pub/sub in backend)
+- remove updatedAt
+- example of long running business logic
+- example of (pub/sub in backend)
 - use events for commit/abort
-
-- gxp
-  - convert gxp to golang
-  - in-memory cache
-    - initialize with pending operations and recently updated transactions
-    - heartbeat saves
-  - backed by db
+- convert gxp to golang
+- gxp in-memory cache saved regularly to db
