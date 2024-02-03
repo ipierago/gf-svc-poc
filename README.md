@@ -33,22 +33,39 @@ Switch k8s context to use Docker Desktop (use "docker-for-desktop" for MacOS):
 kubectl config use-context docker-desktop
 ```
 
+You can switch back to the cloud environment using:
+```bash
+kubectl config get-contexts
+kubectl config use-context gke_virtual-sylph-363317_asia-southeast1-b_gke-project-z-cluster-stg
+```
+
 ## Build and deploy
 
 You can either build and deploy with skaffold/k8s or docker compose.
 
-### Skaffold/K8s
+Make sure you are running a recent version of node.  Use the following to list available versions:
 
 ```bash
-skaffold dev
+nvm ls
 ```
+
+The following is usually a good version to use:
+
+```bash
+nvm use stable
+```
+
+
+### Skaffold/K8s
+
+This is the preferred method, but there are some issues.
 
 There is a known issue with skaffold that the nginx stuff doesn't always boot up correctly, so I've disable it for now. You must deploy nginx ingress controller manually before running skaffold dev.
 
 Install nginx ingress controller (https://kubernetes.github.io/ingress-nginx/deploy/)
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.0/deploy/static/provider/cloud/deploy.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.9.6/deploy/static/provider/cloud/deploy.yaml
 ```
 
 Check that it is running:
@@ -60,8 +77,18 @@ kubectl get pods --namespace=ingress-nginx
 To shutdown:
 
 ```bash
-kubectl delete -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.0/deploy/static/provider/cloud/deploy.yaml
+kubectl delete -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.9.6/deploy/static/provider/cloud/deploy.yaml
 ```
+
+Next, run skaffold dev:
+
+```bash
+skaffold dev
+```
+
+If you have trouble, try waiting a moment and running again.  Sometimes nginx deploy in the first step takes awhile to stabilize.
+
+If you continue to have trouble, restart the Kubernetes cluster from the "Settings" menu on Docker Desktop.
 
 ### Docker compose
 
@@ -92,7 +119,7 @@ The following is a good test sequence:
 
 ```bash
 cd cli
-npm run dev -- info-ls
+npm run dev -- ls
 npm run dev -- create-user my-name
 npm run dev -- create-item my-item 10
 npm run dev -- create-marketplace-item 1 12

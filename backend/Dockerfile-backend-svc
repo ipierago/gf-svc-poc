@@ -1,6 +1,6 @@
 # run from workspace root
 
-FROM node:lts
+FROM node:latest
 
 RUN apt-get update && \
 apt-get install -y protobuf-compiler &&\

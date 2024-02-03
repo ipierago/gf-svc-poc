@@ -1,6 +1,6 @@
 # Set the base image
 
-FROM postgres:14.5
+FROM postgres:latest
 
 # Set environment variables
 
