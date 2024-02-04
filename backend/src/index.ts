@@ -8,7 +8,7 @@ import {
   CreateUserItemRequest, AddGxpRequest,
   GetUserGxpBalanceRequest, GetUserGxpBalanceResponse,
   GetAllRequest, GetAllResponse
-} from '../../shared/dist/gen/backend';
+} from '@gf-svc-poc/shared';
 import { appDataSource } from "./AppDataSource";
 import {
   buyMarketplaceItem, createUser, createItem,
@@ -20,9 +20,7 @@ import { Item } from "./entity/Item";
 import { MarketplaceItem } from './entity/MarketplaceItem';
 import { UserItem } from './entity/UserItem';
 
-//import { initializeEvents } from '../../shared/src/events';
-//import * as shared from '../../shared/dist/index';
-import { initializeEvents } from '../../shared/dist/events';
+import { initializeEvents } from '@gf-svc-poc/shared';
 
 
 const MY_PORT = 30080;

@@ -1,17 +1,18 @@
 {
-  "name": "gxp",
+  "name": "@gf-svc-poc/gxp",
   "version": "1.0.0",
   "description": "My project description",
-  "main": "dist/index.js",
+  "main": "src/index.ts",
   "scripts": {
-    "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts",
-    "build": "tsc",
+    "start": "NODE_ENV=production NODE_PATH=dist/src node dist/index",
+    "dev": "NODE_ENV=development ts-node-dev -r tsconfig-paths/register  --respawn --transpile-only ./src/index",
+    "build": "tsc --build",
     "clean": "rimraf dist"
   },
   "author": "Your Name",
   "license": "ISC",
   "dependencies": {
+    "@gf-svc-poc/shared": "*",
     "@grpc/grpc-js": "^1.8.14",
     "pg": "^8.10.0",
     "reflect-metadata": "^0.1.13",
@@ -21,10 +22,15 @@
   "devDependencies": {
     "@types/node": "^16.11.7",
     "@types/retry": "^0.12.2",
+    "@yarnpkg/sdks": "^3.1.0",
+    "eslint": "^8.56.0",
     "nodemon": "^2.0.15",
+    "prettier": "^3.2.4",
     "rimraf": "^5.0.0",
     "ts-node": "^10.4.0",
+    "ts-node-dev": "^2.0.0",
     "ts-proto": "^1.147.1",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^4.5.4"
   }
 }

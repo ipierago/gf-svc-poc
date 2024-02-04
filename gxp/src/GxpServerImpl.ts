@@ -5,8 +5,8 @@ import {
   TransactionAbortRequest, TransactionCommitRequest, TransactionPrepareRequest, TransactionPrepareResponse,
   CreateUserBalanceRequest, CreateUserBalanceResponse,
   GetUserBalanceRequest, GetUserBalanceResponse, GetAllRequest, GetAllResponse
-} from '../../shared/dist/gen/gxp';
-import { Empty } from "../../shared/dist/gen/google/protobuf/empty";
+} from '@gf-svc-poc/shared';
+import { Empty } from "@gf-svc-poc/shared";
 
 import { transactionPrepare, transactionCommit, transactionAbort, createUserBalance, getUserBalance, getAll } from './services';
 

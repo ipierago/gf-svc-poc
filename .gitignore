@@ -1,3 +1,23 @@
-node_modules
+# Yarn PnP workspace
+.pnp.*
+
+# Local Yarn cache
+.yarn/unplugged
+.yarn/build-state.yml
+
+# Optional: If not using Zero-Installs, ignore the cache
+.yarn/cache
+
+# Always commit these
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+!.yarnrc.yml
+!.yarn/install-state.gz
+
 dist
-gen
+
+.env
+
+node_modules

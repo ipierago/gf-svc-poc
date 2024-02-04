@@ -23,6 +23,13 @@ Components:
 
 ## SETUP
 
+From the root folder:
+```bash
+yarn install
+```
+
+When building docker images, use the root folder as the context.  
+
 ### Docker Desktop and Skaffold (PREFERRED)
 
 Turn on Kubernetes in the Docker Desktop configuration

@@ -10,16 +10,15 @@ ADD https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.s
 RUN chmod +x /usr/wait-for-it.sh
 
 WORKDIR /gf-svc-poc
-COPY ./shared /gf-svc-poc/shared
-COPY ./eventlog /gf-svc-poc/eventlog
+COPY . .
 
 WORKDIR /gf-svc-poc/shared
-RUN npm ci
-RUN npm run build
+RUN yarn install
+RUN yarn build
 
 WORKDIR /gf-svc-poc/eventlog
-RUN npm ci
-RUN npm run build
+RUN yarn install
+RUN yarn build
 
 ENTRYPOINT ["/usr/wait-for-it.sh", "eventlog-db:5432", "--", "/usr/wait-for-it.sh", "rabbitmq:5672", "--"]
 

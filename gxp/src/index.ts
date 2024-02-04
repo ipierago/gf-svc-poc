@@ -1,6 +1,6 @@
 import * as grpc from '@grpc/grpc-js';
 
-import * as gxp from '../../shared/dist/gen/gxp';
+import {GxpService} from '@gf-svc-poc/shared';
 
 import { appDataSource } from "./AppDataSource"
 import { startHeartbeat } from "./heartbeat"
@@ -8,7 +8,7 @@ import { GxpServerImpl } from "./GxpServerImpl";
 import { GxpBalance } from "./entity/GxpBalance";
 import { GxpTransaction } from './entity/GxpTransaction';
 
-import { subscribeBuyItemEvent, initializeEvents } from '../../shared/dist/events'
+import { subscribeBuyItemEvent, initializeEvents } from '@gf-svc-poc/shared'
 
 
 const MY_DOMAIN = "0.0.0.0";
@@ -28,7 +28,7 @@ async function main() {
     console.log("Database initialized")
 
     const server = new grpc.Server();
-    server.addService(gxp.GxpService, new GxpServerImpl());
+    server.addService(GxpService, new GxpServerImpl());
     const addr = `${MY_DOMAIN}:${MY_PORT}`;
     console.log('calling grpc.Server.bindAsyn');
     const srvCred = grpc.ServerCredentials.createInsecure();

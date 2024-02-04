@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",  
+  "display": "Default",
+  "compilerOptions": {
+    "target": "ES2019",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "resolveJsonModule":true,
+    "isolatedModules": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "allowJs": true,
+    "noImplicitAny": false,
+    "allowSyntheticDefaultImports": true,
+    "lib": [
+      "ES2019",
+      "ES6"
+    ],
+
+  },
+  "compileOnSave": true,
+  "ts-node": {
+    "require": [
+      "tsconfig-paths/register"
+    ],
+  },  
+  "exclude": ["node_modules"]
+}

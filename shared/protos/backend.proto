@@ -1,20 +1,10 @@
 syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
-import "gxp.proto";
-
 
 option go_package = "gf-svc-poc/backend";
 package backend;
 
-message GetAllRequest {
-
-}
-
-message GetAllResponse {
-  repeated gxp.Balance balances = 1;
-  repeated gxp.Transaction transactions = 2;
-}
 
 message AddGxpRequest {
   uint32 userId = 1;

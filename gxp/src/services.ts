@@ -7,7 +7,7 @@ import {
   TransactionType,
   TransactionStatus,
   Transaction, Balance
-} from '../../shared/dist/gen/gxp';
+} from '@gf-svc-poc/shared';
 
 export const transactionPrepare = async (userId: number, type: TransactionType, amount: number, correlationId: string, correlationTimestamp: Date) => {
   console.log(`transactionPrepare begin [${correlationId}]`);

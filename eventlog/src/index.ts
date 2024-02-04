@@ -1,6 +1,6 @@
 import { appDataSource } from "./AppDataSource"
 
-import { subscribeBuyItemEvent, initializeEvents } from '../../shared/dist/events'
+import { subscribeBuyItemEvent, initializeEvents } from '@gf-svc-poc/shared'
 import { UserEvent } from "./entity/UserEvent";
 
 async function main() {
