@@ -22,4 +22,4 @@ RUN yarn build
 
 ENTRYPOINT ["/usr/wait-for-it.sh", "eventlog-db:5432", "--", "/usr/wait-for-it.sh", "rabbitmq:5672", "--"]
 
-CMD ["node", "dist/index.js"]
+CMD ["yarn", "start"]

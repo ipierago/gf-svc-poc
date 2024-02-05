@@ -21,7 +21,7 @@ Components:
 - k8s: kubernetes configuration
 - shared: protobuffers and abstraction layer
 
-## SETUP
+## Setup
 
 From the root folder:
 ```bash
@@ -30,7 +30,9 @@ yarn install
 
 When building docker images, use the root folder as the context.  
 
-### Docker Desktop and Skaffold (PREFERRED)
+### Docker Desktop and Skaffold
+
+If you plan on using skaffold, you'll need to do the following setup.
 
 Turn on Kubernetes in the Docker Desktop configuration
 
@@ -40,15 +42,15 @@ Switch k8s context to use Docker Desktop (use "docker-for-desktop" for MacOS):
 kubectl config use-context docker-desktop
 ```
 
-You can switch back to the cloud environment using:
+You can switch back to the gf cloud environment using:
 ```bash
 kubectl config get-contexts
 kubectl config use-context gke_virtual-sylph-363317_asia-southeast1-b_gke-project-z-cluster-stg
 ```
 
-## Build and deploy
+## Build and run
 
-You can either build and deploy with skaffold/k8s or docker compose.
+You can either build and run with skaffold or docker compose.  If you use skaffold, the full k8s setup will be initialized including multiple instances of the microservices and load balancing via nginx ingress controller.  If you use docker compose, you won't get the full setup, but it will be faster.
 
 Make sure you are running a recent version of node.  Use the following to list available versions:
 
@@ -62,12 +64,20 @@ The following is usually a good version to use:
 nvm use stable
 ```
 
+### Docker compose
+
+This is the easiest/quickest way to build and run.
+
+```bash
+docker compose up --build
+```
+
 
 ### Skaffold/K8s
 
-This is the preferred method, but there are some issues.
+Using skaffold will initialize the full k8s setup including multiple instances of services load balanced by an ingress controller.  However, there are two know issues with this setup.
 
-There is a known issue with skaffold that the nginx stuff doesn't always boot up correctly, so I've disable it for now. You must deploy nginx ingress controller manually before running skaffold dev.
+The nginx ingress controller doesn't always boot up correctly, so I've removed it from the skaffold yaml. You must deploy nginx ingress controller manually before running skaffold dev.
 
 Install nginx ingress controller (https://kubernetes.github.io/ingress-nginx/deploy/)
 
@@ -97,11 +107,7 @@ If you have trouble, try waiting a moment and running again.  Sometimes nginx de
 
 If you continue to have trouble, restart the Kubernetes cluster from the "Settings" menu on Docker Desktop.
 
-### Docker compose
-
-```bash
-docker compose up --build
-```
+Logs are not shown in the console when using skaffold.
 
 ### Manual build
 

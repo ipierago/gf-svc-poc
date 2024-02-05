@@ -25,4 +25,4 @@ EXPOSE 30080
 
 ENTRYPOINT ["/usr/wait-for-it.sh", "backend-db:5432", "--", "/usr/wait-for-it.sh", "rabbitmq:5672", "--", "/usr/wait-for-it.sh", "gxp-svc:30002", "--"]
 
-CMD ["node", "dist/index.js"]
+CMD ["yarn", "start"]
