@@ -1,119 +1,168 @@
-import { QueryFailedError } from "typeorm";
-import { GxpBalance } from "./entity/GxpBalance"
-import { GxpTransaction, GxpTransactionStatus, GxpTransactionType } from './entity/GxpTransaction';
-import { appDataSource } from "./AppDataSource"
+import { EntityManager, QueryFailedError } from 'typeorm';
+import { GxpBalance } from './entity/GxpBalance';
+import {
+  GxpTransaction,
+  GxpTransactionStatus,
+  GxpTransactionType,
+} from './entity/GxpTransaction';
+import { AppDataSource } from './database';
 
 import {
   TransactionType,
   TransactionStatus,
-  Transaction, Balance
+  Transaction,
+  Balance,
 } from '@gf-svc-poc/shared';
 
-export const transactionPrepare = async (userId: number, type: TransactionType, amount: number, correlationId: string, correlationTimestamp: Date) => {
+export const transactionPrepare = async (
+  userId: number,
+  type: TransactionType,
+  amount: number,
+  correlationId: string,
+  correlationTimestamp: Date,
+) => {
   console.log(`transactionPrepare begin [${correlationId}]`);
   // TODO: Use optimistic locking retry?
-  await appDataSource.transaction(async (entityMgr) => {
-    const gxpBalance = await entityMgr.findOneByOrFail(GxpBalance, { user_id: userId });
+  await AppDataSource.transaction(async (entityMgr) => {
+    const gxpBalance = await entityMgr.findOneByOrFail(GxpBalance, {
+      user_id: userId,
+    });
     if (type === TransactionType.SUBTRACT) {
-      const updateGxpBalanceResult = await entityMgr.createQueryBuilder().update(GxpBalance)
+      const updateGxpBalanceResult = await entityMgr
+        .createQueryBuilder()
+        .update(GxpBalance)
         .set({ reserved: () => `reserved + ${amount}` })
-        .where('user_id = :user_id AND balance >= reserved + :amount', { user_id: userId, amount })
+        .where('user_id = :user_id AND balance >= reserved + :amount', {
+          user_id: userId,
+          amount,
+        })
         .execute();
       if (updateGxpBalanceResult.affected == 0) {
         //throw new OptimisticLockError("GxpBalance updated");
-        throw new Error("Failed ot reserve");
+        throw new Error('Failed ot reserve');
       }
     }
-    const gxpTransaction = await entityMgr.create(GxpTransaction,
-      {
-        type: (type === TransactionType.ADD ? GxpTransactionType.ADD : GxpTransactionType.SUBTRACT),
-        status: GxpTransactionStatus.PENDING,
-        amount: amount,
-        gxpBalance: gxpBalance,
-        correlationId: correlationId,
-        correlationTimestamp: correlationTimestamp
-      });
+    const gxpTransaction = await entityMgr.create(GxpTransaction, {
+      type:
+        type === TransactionType.ADD
+          ? GxpTransactionType.ADD
+          : GxpTransactionType.SUBTRACT,
+      status: GxpTransactionStatus.PENDING,
+      amount: amount,
+      gxpBalance: gxpBalance,
+      correlationId: correlationId,
+      correlationTimestamp: correlationTimestamp,
+    });
     const saved = await entityMgr.save(gxpTransaction);
     console.log(`saved: ${JSON.stringify(saved)}`);
     console.log(`transactionPrepare end [${correlationId}]`);
   });
-}
+};
 
-export const transactionCommit = async (correlationId: string) => {
-  // TODO: Optimistic locking retry?  or replace where condition
-  console.log(`transactionCommit begin [${correlationId}]`);
-  await appDataSource.transaction(async (entityMgr) => {
-    const gxpTransaction = await entityMgr.findOneByOrFail(GxpTransaction, { correlationId });
-    console.log(`transactionCommit: gxpTransaction: ${JSON.stringify(gxpTransaction)}`);
-    const { amount } = gxpTransaction;
-    if (gxpTransaction.status !== GxpTransactionStatus.PENDING) {
-      throw new Error("gxpTransaction.status !== GxpTransactionStatus.PENDING")
-    }
-    const updateGxpTransationResult = await entityMgr.createQueryBuilder().update(GxpTransaction)
-      .set({ status: GxpTransactionStatus.COMMITTED })
-      .where('id = :id AND status = :status', { id: gxpTransaction.id, status: GxpTransactionStatus.PENDING })
-      .execute();
-    console.log(`updateGxpTransationResult: ${JSON.stringify(updateGxpTransationResult)}`);
-    if (updateGxpTransationResult.affected === 0) {
-      //throw new OptimisticLockError("GxpTransaction");
-      throw new Error("GxpTransaction status unexpectedly changed from PENDING")
-    }
-    if (gxpTransaction.type === GxpTransactionType.ADD) {
-      const updateResult = await entityMgr.createQueryBuilder().update(GxpBalance)
-        .set({ balance: () => `balance + ${amount}` })
-        .where("id = :id", { id: gxpTransaction.gxpBalanceId })
-        .execute();
-      if (updateResult.affected == 0) {
-        throw new Error("Failed to add balance in GxpBalance");
-      }
-    } else {
-      const updateResult = await entityMgr.createQueryBuilder().update(GxpBalance)
-        .set({ balance: () => `balance - ${amount}` })
-        .where('id = :id AND balance >= :amount', { id: gxpTransaction.gxpBalanceId, amount })
-        .execute();
-      if (updateResult.affected == 0) {
-        // TODO: Consistency error
-        throw new Error("Failed to subtract balance in GxpBalance");
-      }
-    }
+export const transactionCommitTransaction = async (
+  correlationId: string,
+  entityMgr: EntityManager,
+) => {
+  console.log(`transactionCommitTransaction [${correlationId}]`);
+  const gxpTransaction = await entityMgr.findOneByOrFail(GxpTransaction, {
+    correlationId,
   });
-  console.log(`transactionCommit end [${correlationId}]`);
-}
+  console.log(
+    `transactionCommit: gxpTransaction: ${JSON.stringify(gxpTransaction)}`,
+  );
+  const { amount } = gxpTransaction;
+  if (gxpTransaction.status !== GxpTransactionStatus.PENDING) {
+    throw new Error('gxpTransaction.status !== GxpTransactionStatus.PENDING');
+  }
+  const updateGxpTransationResult = await entityMgr
+    .createQueryBuilder()
+    .update(GxpTransaction)
+    .set({ status: GxpTransactionStatus.COMMITTED })
+    .where('id = :id AND status = :status', {
+      id: gxpTransaction.id,
+      status: GxpTransactionStatus.PENDING,
+    })
+    .execute();
+  console.log(
+    `updateGxpTransationResult: ${JSON.stringify(updateGxpTransationResult)}`,
+  );
+  if (updateGxpTransationResult.affected === 0) {
+    //throw new OptimisticLockError("GxpTransaction");
+    throw new Error('GxpTransaction status unexpectedly changed from PENDING');
+  }
+  if (gxpTransaction.type === GxpTransactionType.ADD) {
+    const updateResult = await entityMgr
+      .createQueryBuilder()
+      .update(GxpBalance)
+      .set({ balance: () => `balance + ${amount}` })
+      .where('id = :id', { id: gxpTransaction.gxpBalanceId })
+      .execute();
+    if (updateResult.affected == 0) {
+      throw new Error('Failed to add balance in GxpBalance');
+    }
+  } else {
+    const updateResult = await entityMgr
+      .createQueryBuilder()
+      .update(GxpBalance)
+      .set({ balance: () => `balance - ${amount}` })
+      .where('id = :id AND balance >= :amount', {
+        id: gxpTransaction.gxpBalanceId,
+        amount,
+      })
+      .execute();
+    if (updateResult.affected == 0) {
+      // TODO: Consistency error
+      throw new Error('Failed to subtract balance in GxpBalance');
+    }
+  }
+};
 
-export const transactionAbort = async (correlationId: string) => {
-  console.log(`transactionAbort begin [${correlationId}]`);
-  const gxpTransaction = await GxpTransaction.findOneByOrFail({ correlationId });
+export const transactionAbortTransaction = async (
+  correlationId: string,
+  entityMgr: EntityManager,
+) => {
+  console.log(`transactionAbortTransaction [${correlationId}]`);
+  const gxpTransaction = await GxpTransaction.findOneByOrFail({
+    correlationId,
+  });
   const { amount } = gxpTransaction;
   if (gxpTransaction.status === GxpTransactionStatus.ABORTED) {
-    console.log("Already aborted");
+    console.log('Already aborted');
     return;
   } else if (gxpTransaction.status === GxpTransactionStatus.COMMITTED) {
     // TODO: Throw error?
-    console.log("Already committed");
+    console.log('Already committed');
     return;
   }
-  await appDataSource.transaction(async (entityMgr) => {
-    if (gxpTransaction.type === GxpTransactionType.SUBTRACT) {
-      const updateResult = await entityMgr.createQueryBuilder().update(GxpBalance)
-        .set({ reserved: () => `reserved - ${amount}` })
-        .where('id = :id AND reserved >= :amount', { id: gxpTransaction.gxpBalanceId, amount })
-        .execute();
-      if (updateResult.affected == 0) {
-        // TODO: Consistency error, zero out reserved?
-        throw new Error("Failed to update reserved amount");
-      }
-    }
-    const updateGxpTransationResult = await entityMgr.createQueryBuilder().update(GxpTransaction)
-      .set({ status: GxpTransactionStatus.ABORTED })
-      .where('id = :id AND status = :status', { id: gxpTransaction.id, status: GxpTransactionStatus.PENDING })
+  if (gxpTransaction.type === GxpTransactionType.SUBTRACT) {
+    const updateResult = await entityMgr
+      .createQueryBuilder()
+      .update(GxpBalance)
+      .set({ reserved: () => `reserved - ${amount}` })
+      .where('id = :id AND reserved >= :amount', {
+        id: gxpTransaction.gxpBalanceId,
+        amount,
+      })
       .execute();
-    if (updateGxpTransationResult.affected == 0) {
-      //throw new OptimisticLockError("GxpTransaction");
-      throw new Error("Failed to change status to ABORTED");
+    if (updateResult.affected == 0) {
+      // TODO: Consistency error, zero out reserved?
+      throw new Error('Failed to update reserved amount');
     }
-  });
-  console.log(`transactionAbort end [${correlationId}]`);
-}
+  }
+  const updateGxpTransationResult = await entityMgr
+    .createQueryBuilder()
+    .update(GxpTransaction)
+    .set({ status: GxpTransactionStatus.ABORTED })
+    .where('id = :id AND status = :status', {
+      id: gxpTransaction.id,
+      status: GxpTransactionStatus.PENDING,
+    })
+    .execute();
+  if (updateGxpTransationResult.affected == 0) {
+    //throw new OptimisticLockError("GxpTransaction");
+    throw new Error('Failed to change status to ABORTED');
+  }
+};
 
 export const createUserBalance = async (user_id: number) => {
   const existEntity = await GxpBalance.findOneBy({ user_id });
@@ -124,13 +173,16 @@ export const createUserBalance = async (user_id: number) => {
     const newEntity = await GxpBalance.create({ user_id }).save();
     console.log(`created: ${JSON.stringify(newEntity)}`);
   }
-}
+};
 
 export const getUserBalance = async (user_id: number) => {
   const gxpBalance = await GxpBalance.findOneByOrFail({ user_id });
-  return { balance: gxpBalance.balance, reserved: gxpBalance.reserved, updatedAt: gxpBalance.updatedAt };
-}
-
+  return {
+    balance: gxpBalance.balance,
+    reserved: gxpBalance.reserved,
+    updatedAt: gxpBalance.updatedAt,
+  };
+};
 
 function convertTransactionType(gxpType: GxpTransactionType): TransactionType {
   switch (gxpType) {
@@ -144,7 +196,7 @@ function convertTransactionType(gxpType: GxpTransactionType): TransactionType {
 }
 
 function convertTransactionStatus(
-  gxpStatus: GxpTransactionStatus
+  gxpStatus: GxpTransactionStatus,
 ): TransactionStatus {
   switch (gxpStatus) {
     case GxpTransactionStatus.PENDING:
@@ -184,7 +236,7 @@ function convertBalances(gxpBalances: GxpBalance[]): Balance[] {
       balance: gxpBalance.balance,
       reserved: gxpBalance.reserved,
       updatedAt: gxpBalance.updatedAt,
-    }
+    };
     balances.push(balance);
   }
   return balances;
@@ -196,4 +248,4 @@ export const getAll = async () => {
   const gxpTransactions = await GxpTransaction.find();
   const transactions = convertTransactions(gxpTransactions);
   return { balances, transactions };
-}
+};

@@ -1,6 +1,5 @@
 syntax = "proto3";
 
-import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
 option go_package = "gf-svc-poc/gxp";
@@ -55,14 +54,6 @@ message TransactionPrepareResponse {
   string correlationId = 1;
 }
 
-message TransactionCommitRequest{
-  string correlationId = 1;
-}
-
-message TransactionAbortRequest{
-  string correlationId = 1;
-}
-
 message CreateUserBalanceRequest {
   uint32 userId = 1;
   string correlationId = 3;
@@ -88,8 +79,6 @@ message GetUserBalanceResponse {
 
 service Gxp {
   rpc TransactionPrepare(TransactionPrepareRequest) returns (TransactionPrepareResponse) {}
-  rpc TransactionAbort(TransactionAbortRequest) returns (google.protobuf.Empty) {}
-  rpc TransactionCommit(TransactionCommitRequest) returns (google.protobuf.Empty) {}
 
   rpc CreateUserBalance(CreateUserBalanceRequest) returns (CreateUserBalanceResponse) {}
   rpc GetUserBalance(GetUserBalanceRequest) returns (GetUserBalanceResponse) {}

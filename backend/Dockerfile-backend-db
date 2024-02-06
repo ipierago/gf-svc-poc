@@ -1,13 +1,16 @@
 # Set the base image
-
 FROM postgres:latest
 
-# Set environment variables
+# Set the environment variable to control the WAL level
+ENV POSTGRES_INITDB_ARGS="-c wal_level=logical"
 
-ENV POSTGRES_USER=test \
- POSTGRES_PASSWORD=test \
- POSTGRES_DB=test
+# Set standard postgres environment variables
+ENV POSTGRES_USER=test
+ENV POSTGRES_PASSWORD=test
+ENV POSTGRES_DB=test
+
+# Copy the init script to the container's script execution directory
+COPY ./backend/init.sql /docker-entrypoint-initdb.d/
 
 # Expose the default PostgreSQL port
-
 EXPOSE 5432

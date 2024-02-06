@@ -1,5 +1,17 @@
 FROM postgres:latest
-ENV POSTGRES_USER=test \
- POSTGRES_PASSWORD=test \
- POSTGRES_DB=test
+
+ADD https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh /usr/wait-for-it.sh
+RUN chmod +x /usr/wait-for-it.sh
+
+# Database env vars
+ENV POSTGRES_USER=test
+ENV POSTGRES_PASSWORD=test
+ENV POSTGRES_DB=test
+
+# Copy the init script to the container's script execution directory
+COPY ./gxp/init.sql /docker-entrypoint-initdb.d/
+
 EXPOSE 5432
+
+# Wait for the backend-db to be ready before starting the container so that our subscription will execute
+ENTRYPOINT ["/usr/wait-for-it.sh", "backend-db:5432", "--", "docker-entrypoint.sh", "postgres"]

@@ -5,3 +5,5 @@ export * from './src/gen/backend';
 export * from './src/gen/gxp';
 export * from './src/gen/google/protobuf/empty';
 export * from './src/gen/google/protobuf/timestamp';
+export * from './src/entity/TransactionOutbox';
+export * from './src/TransactionOutboxApi';

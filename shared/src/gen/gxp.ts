@@ -9,7 +9,6 @@ import type {
   UntypedServiceImplementation,
 } from "@grpc/grpc-js";
 import _m0 from "protobufjs/minimal";
-import { Empty } from "./google/protobuf/empty";
 import { Timestamp } from "./google/protobuf/timestamp";
 
 export enum TransactionType {
@@ -116,14 +115,6 @@ export interface TransactionPrepareRequest {
 }
 
 export interface TransactionPrepareResponse {
-  correlationId: string;
-}
-
-export interface TransactionCommitRequest {
-  correlationId: string;
-}
-
-export interface TransactionAbortRequest {
   correlationId: string;
 }
 
@@ -670,120 +661,6 @@ export const TransactionPrepareResponse = {
   },
 };
 
-function createBaseTransactionCommitRequest(): TransactionCommitRequest {
-  return { correlationId: "" };
-}
-
-export const TransactionCommitRequest = {
-  encode(message: TransactionCommitRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.correlationId !== "") {
-      writer.uint32(10).string(message.correlationId);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): TransactionCommitRequest {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseTransactionCommitRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.correlationId = reader.string();
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): TransactionCommitRequest {
-    return { correlationId: isSet(object.correlationId) ? globalThis.String(object.correlationId) : "" };
-  },
-
-  toJSON(message: TransactionCommitRequest): unknown {
-    const obj: any = {};
-    if (message.correlationId !== "") {
-      obj.correlationId = message.correlationId;
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<TransactionCommitRequest>, I>>(base?: I): TransactionCommitRequest {
-    return TransactionCommitRequest.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<TransactionCommitRequest>, I>>(object: I): TransactionCommitRequest {
-    const message = createBaseTransactionCommitRequest();
-    message.correlationId = object.correlationId ?? "";
-    return message;
-  },
-};
-
-function createBaseTransactionAbortRequest(): TransactionAbortRequest {
-  return { correlationId: "" };
-}
-
-export const TransactionAbortRequest = {
-  encode(message: TransactionAbortRequest, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
-    if (message.correlationId !== "") {
-      writer.uint32(10).string(message.correlationId);
-    }
-    return writer;
-  },
-
-  decode(input: _m0.Reader | Uint8Array, length?: number): TransactionAbortRequest {
-    const reader = input instanceof _m0.Reader ? input : _m0.Reader.create(input);
-    let end = length === undefined ? reader.len : reader.pos + length;
-    const message = createBaseTransactionAbortRequest();
-    while (reader.pos < end) {
-      const tag = reader.uint32();
-      switch (tag >>> 3) {
-        case 1:
-          if (tag !== 10) {
-            break;
-          }
-
-          message.correlationId = reader.string();
-          continue;
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break;
-      }
-      reader.skipType(tag & 7);
-    }
-    return message;
-  },
-
-  fromJSON(object: any): TransactionAbortRequest {
-    return { correlationId: isSet(object.correlationId) ? globalThis.String(object.correlationId) : "" };
-  },
-
-  toJSON(message: TransactionAbortRequest): unknown {
-    const obj: any = {};
-    if (message.correlationId !== "") {
-      obj.correlationId = message.correlationId;
-    }
-    return obj;
-  },
-
-  create<I extends Exact<DeepPartial<TransactionAbortRequest>, I>>(base?: I): TransactionAbortRequest {
-    return TransactionAbortRequest.fromPartial(base ?? ({} as any));
-  },
-  fromPartial<I extends Exact<DeepPartial<TransactionAbortRequest>, I>>(object: I): TransactionAbortRequest {
-    const message = createBaseTransactionAbortRequest();
-    message.correlationId = object.correlationId ?? "";
-    return message;
-  },
-};
-
 function createBaseCreateUserBalanceRequest(): CreateUserBalanceRequest {
   return { userId: 0, correlationId: "", correlationTimestamp: undefined };
 }
@@ -1140,24 +1017,6 @@ export const GxpService = {
       Buffer.from(TransactionPrepareResponse.encode(value).finish()),
     responseDeserialize: (value: Buffer) => TransactionPrepareResponse.decode(value),
   },
-  transactionAbort: {
-    path: "/gxp.Gxp/TransactionAbort",
-    requestStream: false,
-    responseStream: false,
-    requestSerialize: (value: TransactionAbortRequest) => Buffer.from(TransactionAbortRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer) => TransactionAbortRequest.decode(value),
-    responseSerialize: (value: Empty) => Buffer.from(Empty.encode(value).finish()),
-    responseDeserialize: (value: Buffer) => Empty.decode(value),
-  },
-  transactionCommit: {
-    path: "/gxp.Gxp/TransactionCommit",
-    requestStream: false,
-    responseStream: false,
-    requestSerialize: (value: TransactionCommitRequest) => Buffer.from(TransactionCommitRequest.encode(value).finish()),
-    requestDeserialize: (value: Buffer) => TransactionCommitRequest.decode(value),
-    responseSerialize: (value: Empty) => Buffer.from(Empty.encode(value).finish()),
-    responseDeserialize: (value: Buffer) => Empty.decode(value),
-  },
   createUserBalance: {
     path: "/gxp.Gxp/CreateUserBalance",
     requestStream: false,
@@ -1190,8 +1049,6 @@ export const GxpService = {
 
 export interface GxpServer extends UntypedServiceImplementation {
   transactionPrepare: handleUnaryCall<TransactionPrepareRequest, TransactionPrepareResponse>;
-  transactionAbort: handleUnaryCall<TransactionAbortRequest, Empty>;
-  transactionCommit: handleUnaryCall<TransactionCommitRequest, Empty>;
   createUserBalance: handleUnaryCall<CreateUserBalanceRequest, CreateUserBalanceResponse>;
   getUserBalance: handleUnaryCall<GetUserBalanceRequest, GetUserBalanceResponse>;
   getAll: handleUnaryCall<GetAllRequest, GetAllResponse>;
@@ -1212,36 +1069,6 @@ export interface GxpClient extends Client {
     metadata: Metadata,
     options: Partial<CallOptions>,
     callback: (error: ServiceError | null, response: TransactionPrepareResponse) => void,
-  ): ClientUnaryCall;
-  transactionAbort(
-    request: TransactionAbortRequest,
-    callback: (error: ServiceError | null, response: Empty) => void,
-  ): ClientUnaryCall;
-  transactionAbort(
-    request: TransactionAbortRequest,
-    metadata: Metadata,
-    callback: (error: ServiceError | null, response: Empty) => void,
-  ): ClientUnaryCall;
-  transactionAbort(
-    request: TransactionAbortRequest,
-    metadata: Metadata,
-    options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: Empty) => void,
-  ): ClientUnaryCall;
-  transactionCommit(
-    request: TransactionCommitRequest,
-    callback: (error: ServiceError | null, response: Empty) => void,
-  ): ClientUnaryCall;
-  transactionCommit(
-    request: TransactionCommitRequest,
-    metadata: Metadata,
-    callback: (error: ServiceError | null, response: Empty) => void,
-  ): ClientUnaryCall;
-  transactionCommit(
-    request: TransactionCommitRequest,
-    metadata: Metadata,
-    options: Partial<CallOptions>,
-    callback: (error: ServiceError | null, response: Empty) => void,
   ): ClientUnaryCall;
   createUserBalance(
     request: CreateUserBalanceRequest,
